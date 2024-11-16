@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Visual Studio\\Proga2_3semestr\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A3DA8BAF-EE63-4403-96E0-DD68939F6131}|Proga2_3semestr.vcxproj|D:\\Visual Studio\\Proga2_3semestr\\Proga2_3semestr.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A3DA8BAF-EE63-4403-96E0-DD68939F6131}|Proga2_3semestr.vcxproj|solutionrelative:Proga2_3semestr.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Proga2_3semestr.cpp",
+              "DocumentMoniker": "D:\\Visual Studio\\Proga2_3semestr\\Proga2_3semestr.cpp",
+              "RelativeDocumentMoniker": "Proga2_3semestr.cpp",
+              "ToolTip": "D:\\Visual Studio\\Proga2_3semestr\\Proga2_3semestr.cpp",
+              "RelativeToolTip": "Proga2_3semestr.cpp",
+              "ViewState": "AQIAACUAAAAAAAAAAADwv4sAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-16T07:57:05.397Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
