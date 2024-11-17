@@ -116,7 +116,7 @@ class VisitorPass {
 private:
     char firstName[MAX_NAME_LENGTH];
     char lastName[MAX_NAME_LENGTH];
-    char id[3]; // Идентификационный номер из 2 цифр
+    char id[3]; 
     Appearance appearance;
 
 public:
@@ -250,166 +250,13 @@ int main() {
 }
 
 
-/*#define MAX_NAME_LENGTH 50
-#define MAX_APPEARANCE_LENGTH 50
-#define MAX_PHONE_LENGTH 15
-#define RESIDENTS_COUNT 10
-
-class Appearance {
-private:
-    char hairColor[MAX_NAME_LENGTH];
-    char clothes[MAX_APPEARANCE_LENGTH];
-
-public:
-    void setAppearance(const char* hair, const char* cloth) {
-        strncpy(hairColor, hair, MAX_NAME_LENGTH);
-        strncpy(clothes, cloth, MAX_APPEARANCE_LENGTH);
-    }
-
-    const char* getHairColor() const {
-        return hairColor;
-    }
-
-    const char* getClothes() const {
-        return clothes;
-    }
-};
-
-class Resident {
-private:
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[9]; // Идентификационный номер из 8 цифр
-    Appearance appearance;
-    char phone[MAX_PHONE_LENGTH];
-
-public:
-    void initialize(const char* first, const char* last, const char* identity, const char* hair, const char* cloth, const char* phoneNum) {
-        strncpy(firstName, first, MAX_NAME_LENGTH);
-        strncpy(lastName, last, MAX_NAME_LENGTH);
-        strncpy(id, identity, 9); // 8 цифр и 1 для нуля
-        appearance.setAppearance(hair, cloth);
-        strncpy(phone, phoneNum, MAX_PHONE_LENGTH);
-    }
-
-    const char* getFirstName() const {
-        return firstName;
-    }
-
-    const char* getLastName() const {
-        return lastName;
-    }
-
-    const char* getId() const {
-        return id;
-    }
-
-    const Appearance& getAppearance() const {
-        return appearance;
-    }
-
-    const char* getPhone() const {
-        return phone;
-    }
-};
-
-class VisitorPass {
-private:
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[9]; // Идентификационный номер из 8 цифр
-    Appearance appearance;
-
-public:
-    void inputVisitorPass() {
-        std::cout << "Введите имя: ";
-        std::cin >> firstName;
-        std::cout << "Введите фамилию: ";
-        std::cin >> lastName;
-        std::cout << "Введите идентификационный номер (8 цифр): ";
-        std::cin >> id;
-        std::cout << "Введите цвет волос: ";
-        char hair[MAX_NAME_LENGTH];
-        std::cin.ignore();
-        std::cin.getline(hair, sizeof(hair));
-        appearance.setAppearance(hair, "");
-        std::cout << "Введите одежду: ";
-        char clothes[MAX_APPEARANCE_LENGTH];
-        std::cin.ignore();
-        std::cin.getline(clothes, sizeof(clothes));
-        appearance.setAppearance(clothes, "");
-    }
-
-    const char* getFirstName() const {
-        return firstName;
-    }
-
-    const char* getLastName() const {
-        return lastName;
-    }
-
-    const char* getId() const {
-        return id;
-    }
-
-    const Appearance& getAppearance() const {
-        return appearance;
-    }
-};
-
-class SecurityCheck {
-public:
-    static int checkVisitor(const Resident residents[], const VisitorPass& visitor) {
-        for (int i = 0; i < RESIDENTS_COUNT; i++) {
-            if (strcmp(residents[i].getFirstName(), visitor.getFirstName()) == 0 &&
-                strcmp(residents[i].getLastName(), visitor.getLastName()) == 0 &&
-                strcmp(residents[i].getId(), visitor.getId()) == 0 &&
-                strcmp(residents[i].getAppearance().getHairColor(), visitor.getAppearance().getHairColor()) == 0 &&
-                strcmp(residents[i].getAppearance().getClothes(), visitor.getAppearance().getClothes()) == 0) {
-                return 1; // Совпадение найдено
-            }
-        }
-        return 0; // Совпадение не найдено
-    }
-};
-
-// Функция инициализации изначальных данных жильцов
-void initializeResidents(Resident residents[]) {
-    residents[0].initialize("Иван", "Иванов", "00000001", "Коричневый", "Синий свитер", "123456789");
-    residents[1].initialize("пётр", "сидоров", "02", "чёрный", "красная футболка", "123456790");
-    residents[2].initialize("Ivan", "Ivanov", "00000003", "Brown", "Blue sweater", "123456791");
-    // ... Инициализируем остальных жильцов
-}
-
-int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    Resident residents[RESIDENTS_COUNT];
-    VisitorPass visitor;
-
-    initializeResidents(residents);
-
-    // Ввод данных посетителя
-    visitor.inputVisitorPass();
-
-    // Проверка
-    if (SecurityCheck::checkVisitor(residents, visitor)) {
-        std::cout << "\nДанные совпадают. Допуск разрешён.\n";
-    }
-    else {
-        std::cout << "\nДанные не совпадают. Возможно, это монстр-двойник!\n";
-    }
-
-    return 0;
-}*/
-
 
 
 
 /*#define MAX_NAME_LENGTH 50
 #define MAX_APPEARANCE_LENGTH 100
 #define MAX_PHONE_LENGTH 15
-#define RESIDENTS_COUNT 10
+#define RESIDENTS_COUNT 3
 
 typedef struct {
     char hairColor[MAX_NAME_LENGTH];
@@ -419,7 +266,7 @@ typedef struct {
 typedef struct {
     char firstName[MAX_NAME_LENGTH];
     char lastName[MAX_NAME_LENGTH];
-    char id[9]; // Идентификационный номер из 8 цифр
+    char id[3]; // Идентификационный номер из 2 цифр
     Appearance appearance;
     char phone[MAX_PHONE_LENGTH];
 } Resident;
@@ -427,7 +274,7 @@ typedef struct {
 typedef struct {
     char firstName[MAX_NAME_LENGTH];
     char lastName[MAX_NAME_LENGTH];
-    char id[9]; // Идентификационный номер из 8 цифр
+    char id[3];
     Appearance appearance;
 } VisitorPass;
 
@@ -460,7 +307,6 @@ void initializeResidents(Resident residents[]) {
     strcpy(residents[2].appearance.hairColor, "Brown");
     strcpy(residents[2].appearance.clothes, "Blue sweater");
     strcpy(residents[2].phone, "123456791");
-    // ... Инициализируем остальных жильцов (для примера добавим только одного)
 }
 
 // Функция ввода данных жильца, который пришёл на проверку
