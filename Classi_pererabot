@@ -1,0 +1,336 @@
+#define _CRT_SECURE_NO_WARNINGS
+//#include <locale.h>
+#include <windows.h>
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <cstdlib>
+
+const int MAX_NAME_LENGTH = 50;
+const int MAX_APPEARANCE_LENGTH = 50;
+const int MAX_PHONE_LENGTH = 15;
+const int RESIDENTS_COUNT = 5;
+const char* FILENAME = "residents2.txt";
+const char* RESULT_FILENAME = "results2.txt";
+
+class Appearance {
+private:
+    char hairColor[MAX_NAME_LENGTH];
+    char clothes[MAX_APPEARANCE_LENGTH];
+
+public:
+    Appearance() {
+        strcpy(hairColor, "Unknown");
+        strcpy(clothes, "Unknown");
+    }
+
+    void setAppearance(const char* hair, const char* cloth) {
+        strcpy(hairColor, hair);
+        strcpy(clothes, cloth);
+    }
+
+    const char* getHairColor() const {
+        return hairColor;
+    }
+
+    const char* getClothes() const {
+        return clothes;
+    }
+};
+
+class Resident {
+private:
+    char firstName[MAX_NAME_LENGTH];
+    char lastName[MAX_NAME_LENGTH];
+    char id[3]; // Идентификационный номер из 2 цифр
+    Appearance appearance;
+    char phone[MAX_PHONE_LENGTH];
+
+public:
+    Resident() {
+        strcpy(firstName, "Unknown");
+        strcpy(lastName, "Unknown");
+        strcpy(id, "00");
+        strcpy(phone, "Unknown");
+    }
+
+    void setResident(const char* first, const char* last, const char* idNum, const char* hair, const char* cloth, const char* phoneNum) {
+        strcpy(firstName, first);
+        strcpy(lastName, last);
+        strcpy(id, idNum);
+        appearance.setAppearance(hair, cloth);
+        strcpy(phone, phoneNum);
+    }
+
+    const char* getFirstName() const { return firstName; }
+    const char* getLastName() const { return lastName; }
+    const char* getId() const { return id; }
+    const char* getPhone() const { return phone; }
+    const Appearance& getAppearance() const { return appearance; }
+};
+
+class VisitorPass {
+private:
+    char firstName[MAX_NAME_LENGTH];
+    char lastName[MAX_NAME_LENGTH];
+    char id[3];
+    Appearance appearance;
+
+public:
+    VisitorPass() {
+        strcpy(firstName, "Unknown");
+        strcpy(lastName, "Unknown");
+        strcpy(id, "00");
+    }
+
+    void setVisitor(const char* first, const char* last, const char* idNum, const char* hair, const char* cloth) {
+        strcpy(firstName, first);
+        strcpy(lastName, last);
+        strcpy(id, idNum);
+        appearance.setAppearance(hair, cloth);
+    }
+
+    const char* getFirstName() const { return firstName; }
+    const char* getLastName() const { return lastName; }
+    const char* getId() const { return id; }
+    const Appearance& getAppearance() const { return appearance; }
+};
+
+class CheckResult {
+public:
+    Resident resident;
+    int isMatch;
+    const char* discrepancyReason;
+
+    CheckResult() : isMatch(0), discrepancyReason("") {}
+};
+
+class Game {
+private:
+    Resident residents[RESIDENTS_COUNT];
+    int residentCount;
+
+public:
+    Game() : residentCount(0) {
+        initializeResidents();
+    }
+
+    void initializeResidents() {
+        std::ifstream file(FILENAME);
+        if (!file) {
+            std::cerr << "Не удалось открыть файл жильцов.\n";
+            return;
+        }
+
+        while (file) {
+            char first[MAX_NAME_LENGTH], last[MAX_NAME_LENGTH], id[3], hair[MAX_NAME_LENGTH], cloth[MAX_APPEARANCE_LENGTH], phone[MAX_PHONE_LENGTH];
+            if (file >> first >> last >> id >> hair >> cloth >> phone) {
+                residents[residentCount].setResident(first, last, id, hair, cloth, phone);
+                residentCount++;
+            }
+        }
+        file.close();
+    }
+
+    void inputVisitorPass(VisitorPass& visitor) {
+        char first[MAX_NAME_LENGTH], last[MAX_NAME_LENGTH], id[3], hair[MAX_NAME_LENGTH], cloth[MAX_APPEARANCE_LENGTH];
+        std::cout << "Введите имя посетителя: ";
+        std::cin >> first;
+        std::cout << "Введите фамилию посетителя: ";
+        std::cin >> last;
+        std::cout << "Введите ID посетителя: ";
+        std::cin >> id;
+        std::cout << "Введите цвет волос: ";
+        std::cin >> hair;
+        std::cout << "Введите одежду: ";
+        std::cin >> cloth;
+
+        visitor.setVisitor(first, last, id, hair, cloth);
+    }
+
+    CheckResult checkVisitor(Resident *residents, VisitorPass visitor, int chel) {
+        CheckResult result;
+
+        int i = chel;
+            int a = 0;
+            if (strcmp(residents[i].getFirstName(), visitor.getFirstName()) != 0) {
+                result.discrepancyReason = "Неправильное имя";
+                a++;
+            }
+            else if (strcmp(residents[i].getLastName(), visitor.getLastName()) != 0) {
+                result.discrepancyReason = "Неправильная фамилия";
+                a++;
+            }
+            else if (strcmp(residents[i].getId(), visitor.getId()) != 0) {
+                result.discrepancyReason = "Неправильный id";
+                a++;
+            }
+            else if (strcmp(residents[i].getAppearance().getHairColor(), visitor.getAppearance().getHairColor()) != 0) {
+                result.discrepancyReason = "Неправильный цвет волос";
+                a++;
+            }
+            else if (strcmp(residents[i].getAppearance().getClothes(), visitor.getAppearance().getClothes()) != 0) {
+                result.discrepancyReason = "Неправильная одежда";
+                a++;
+            }
+            if (a == 0) {
+                result.isMatch = 1;
+                return result;
+            }
+            else result.isMatch = 0;
+        return result;
+        /*CheckResult result;
+        for (int i = 0; i < residentCount; ++i) {
+            if (strcmp(residents[i].getId(), visitor.getId()) == 0) {
+                result.isMatch = 1;
+                result.resident = residents[i];
+                return result;
+            }
+        }
+        result.isMatch = 0;
+        result.discrepancyReason = "ID не совпадает.";
+        return result;*/
+    }
+
+    void run() {
+        /*
+        VisitorPass visitor;
+        while (true) {
+            inputVisitorPass(visitor);
+            CheckResult result = checkVisitor(visitor);
+            if (result.isMatch) {
+                std::cout << "Данные совпадают. Допуск разрешён.\n";
+            }
+            else {
+                std::cout << "Данные не совпадают. Причина: " << result.discrepancyReason << "\n";
+            }
+            */
+        FILE* resultFile = fopen(RESULT_FILENAME, "a");
+        if (resultFile == NULL) {
+            std::cout << "Не удалось открыть файл для записи.\n";
+            return;
+        }
+
+        int proh = 0;
+
+        VisitorPass visitor;
+        int totalActualResidents = 0;
+        int totalMonsters = 0;
+        int totalActResNOT = 0;
+        int totalMonsNOT = 0;
+
+        while (true) {
+            int chel = rand() % 5; // 0, 1 или 2
+            //std::cout << "\nchel = " << chel << "\n";
+
+            // Ввод данных пришедшего жильца
+            inputVisitorPass(visitor);
+
+            //inputVisitorPass(visitor);
+            char prop;
+            CheckResult result = checkVisitor(residents, visitor, chel);
+            if (result.isMatch) {
+                std::cout << "Данные совпадают. Допуск разрешён.\n";
+                std::cout << "Вы хотите его пропустить? (y/n)\n";
+                std::cin >> prop;
+                if (prop == 'y' || prop == 'Y') {
+                    totalActualResidents++;
+                }
+                else {
+                    totalActResNOT++;
+                }
+            }
+            else {
+                std::cout << "\nДанные не совпадают. Возможно, это монстр-двойник! Причина: " << result.discrepancyReason << "\n";
+                //std::cout << result.discrepancyReason << "\n";
+                //char prop;
+                std::cout << "Вы хотите его пропустить? (y/n)\n";
+                std::cin >> prop;
+                if (prop == 'y' || prop == 'Y') {
+                    totalMonsters++;
+                    std::cout << "Вы убиты! Game over!\n";
+                    break;
+                }
+                else {
+                    totalMonsNOT++;
+                }
+            }
+
+            proh++;
+            if (proh == 5) {
+                std::cout << "\nПоздравляем! Вы не погибли сегодня!\n";
+                break;
+            }
+
+            char continueChecking;
+            std::cout << "Хотите продолжить проверку? (y/n): ";
+            std::cin >> continueChecking;
+            if (continueChecking != 'y' && continueChecking != 'Y') {
+                break;
+            }
+        }
+        printf("\nРезультаты этой игры: \n");
+        printf("Настоящих жильцов пропущено: %d\n", totalActualResidents);
+        printf("Монстров-двойников пропущено: %d\n", totalMonsters);
+        printf("Настоящих жильцов не пропущено: %d\n", totalActResNOT);
+        printf("Монстров-двойников не пропущено: %d\n", totalMonsNOT);
+
+        fprintf(resultFile, "Настоящих жильцов пропущено: %d\n", totalActualResidents);
+        fprintf(resultFile, "Монстров-двойников пропущено: %d\n", totalMonsters);
+        fprintf(resultFile, "Настоящих жильцов не пропущено: %d\n", totalActResNOT);
+        fprintf(resultFile, "Монстров-двойников не пропущено: %d\n", totalMonsNOT);
+
+        fclose(resultFile);
+        std::cout << "Результаты проверки записаны в файл results.txt\n";
+
+        // Чтение результатов
+        readResults();
+    }
+private:
+    void readResults() {
+        FILE* resultFile1 = fopen(RESULT_FILENAME, "r");
+        if (resultFile1 == NULL) {
+            std::cout << "Не удалось открыть файл для чтения.\n";
+            return;
+        }
+        char s[40];
+        int A[80];
+        int i = 0;
+        while (fscanf(resultFile1, "%[^:]: %d\n", s, &A[i]) != EOF) {
+            i++;
+        }
+        fclose(resultFile1);
+
+        // Обработка результатов
+        int itogI = i;
+        i = 0;
+        int itog1 = A[0], itog2 = A[1], itog3 = A[2], itog4 = A[3];
+        while (i < (itogI - 1)) {
+            if (A[i + 4] > itog1) itog1 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog2) itog2 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog3) itog3 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog4) itog4 = A[i + 4];
+            i++;
+        }
+        char prod;
+        printf("\nХотите увидеть рекорды Ваших игр?(y/n)\n");
+        std::cin >> prod;
+        if (prod == 'y' || prod == 'Y') {
+            std::cout << "\nРекорд пропускания настоящих жильцов: " << itog1 << ".\n";
+            std::cout << "Рекорд пропускания монстров-двойников: " << itog2 << ".\n";
+            std::cout << "Больше всего не пропущенных настоящих жильцов: " << itog3 << ".\n";
+            std::cout << "Больше всего не пропущенных монстров-двойников: " << itog4 << ".\n";
+        }
+    }
+};
+
+int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    Game game;
+    game.run();
+    return 0;
+}
