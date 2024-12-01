@@ -1,5 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-//#include <locale.h>
 #include <windows.h>
 #include <iostream>
 #include <fstream>
@@ -129,6 +128,11 @@ public:
                 residentCount++;
             }
         }
+        if (residentCount == 0) {
+            std::cout << "Ой. Похоже, что в этом доме ещё никто не живёт!\n";
+            file.close();
+            exit(1);
+        }
         file.close();
     }
 
@@ -179,32 +183,9 @@ public:
             }
             else result.isMatch = 0;
         return result;
-        /*CheckResult result;
-        for (int i = 0; i < residentCount; ++i) {
-            if (strcmp(residents[i].getId(), visitor.getId()) == 0) {
-                result.isMatch = 1;
-                result.resident = residents[i];
-                return result;
-            }
-        }
-        result.isMatch = 0;
-        result.discrepancyReason = "ID не совпадает.";
-        return result;*/
     }
 
     void run() {
-        /*
-        VisitorPass visitor;
-        while (true) {
-            inputVisitorPass(visitor);
-            CheckResult result = checkVisitor(visitor);
-            if (result.isMatch) {
-                std::cout << "Данные совпадают. Допуск разрешён.\n";
-            }
-            else {
-                std::cout << "Данные не совпадают. Причина: " << result.discrepancyReason << "\n";
-            }
-            */
         FILE* resultFile = fopen(RESULT_FILENAME, "a");
         if (resultFile == NULL) {
             std::cout << "Не удалось открыть файл для записи.\n";
@@ -227,10 +208,14 @@ public:
             inputVisitorPass(visitor);
 
             //inputVisitorPass(visitor);
-            char prop;
+            char prop, zvon;
+            int f = 0;
             CheckResult result = checkVisitor(residents, visitor, chel);
             if (result.isMatch) {
                 std::cout << "Данные совпадают. Допуск разрешён.\n";
+                std::cout << "\nВы хотите позвонить в квартиру жильца?(y/n)\n";
+                std::cin >> zvon;
+                if (zvon == 'y' || zvon == 'Y') callResident(&residents[chel], f);// Звонок настоящему жильцу
                 std::cout << "Вы хотите его пропустить? (y/n)\n";
                 std::cin >> prop;
                 if (prop == 'y' || prop == 'Y') {
@@ -242,8 +227,19 @@ public:
             }
             else {
                 std::cout << "\nДанные не совпадают. Возможно, это монстр-двойник! Причина: " << result.discrepancyReason << "\n";
-                //std::cout << result.discrepancyReason << "\n";
-                //char prop;
+                std::cout << "\nВы хотите позвонить в квартиру жильца?(y/n)\n";
+                std::cin >> zvon;
+                if (zvon == 'y' || zvon == 'Y') {
+                    // Попробуем найти жильца по ID
+                    int residentIndex = findResidentById(residents, visitor.getId());
+                    if (residentIndex != -1) {
+                        f = 1;
+                        callResident(&residents[chel], f); // Звонок настоящему жильцу
+                    }
+                    else {
+                        printf("Не удалось найти жильца с ID %s.\n", visitor.getId());
+                    }
+                }
                 std::cout << "Вы хотите его пропустить? (y/n)\n";
                 std::cin >> prop;
                 if (prop == 'y' || prop == 'Y') {
@@ -284,9 +280,37 @@ public:
         std::cout << "Результаты проверки записаны в файл results.txt\n";
 
         // Чтение результатов
-        readResults();
+        char rec;
+        std::cout << "\nХотите узнать рекорды за всё время?(y/n)\n";
+        std::cin >> rec;
+        if (rec == 'y' || rec == 'Y') readResults();
     }
 private:
+    void callResident(const Resident* resident, int f) {
+        printf("Звонок на номер: %s\n", resident->getPhone());
+        // Симуляция звонка
+        for (int i = 0; i < 3; ++i) {
+            std::cout << "Звонок...\n";
+            Sleep(1000); // Задержка 1 секунда
+        }
+        if (f == 1) {
+            std::cout << "Ответ: Я дома!\n"; // Двойник
+        }
+        else {
+            std::cout << "Ответа нет.\n"; // Настоящий житель не отвечает
+        }
+    }
+
+    // Функция для поиска жильца по ID
+    int findResidentById(const Resident residents[], const char* id) {
+        for (int i = 0; i < RESIDENTS_COUNT; i++) {
+            if (strcmp(residents[i].getId(), id) == 0) {
+                return i; // Возвращаем индекс жильца с совпадающим ID
+            }
+        }
+        return -1; // Нет совпадения 
+    }
+
     void readResults() {
         FILE* resultFile1 = fopen(RESULT_FILENAME, "r");
         if (resultFile1 == NULL) {
@@ -315,15 +339,10 @@ private:
             if (A[i + 4] > itog4) itog4 = A[i + 4];
             i++;
         }
-        char prod;
-        printf("\nХотите увидеть рекорды Ваших игр?(y/n)\n");
-        std::cin >> prod;
-        if (prod == 'y' || prod == 'Y') {
-            std::cout << "\nРекорд пропускания настоящих жильцов: " << itog1 << ".\n";
-            std::cout << "Рекорд пропускания монстров-двойников: " << itog2 << ".\n";
-            std::cout << "Больше всего не пропущенных настоящих жильцов: " << itog3 << ".\n";
-            std::cout << "Больше всего не пропущенных монстров-двойников: " << itog4 << ".\n";
-        }
+        std::cout << "\nРекорд пропускания настоящих жильцов: " << itog1 << ".\n";
+        std::cout << "Рекорд пропускания монстров-двойников: " << itog2 << ".\n";
+        std::cout << "Больше всего не пропущенных настоящих жильцов: " << itog3 << ".\n";
+        std::cout << "Больше всего не пропущенных монстров-двойников: " << itog4 << ".\n";
     }
 };
 
