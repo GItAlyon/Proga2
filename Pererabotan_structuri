@@ -1,25 +1,20 @@
-// Proga2_3semestr.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
 #define _CRT_SECURE_NO_WARNINGS
-#include <locale.h>
 #include <windows.h>
-
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Struct dorabotannie
 
 #define MAX_NAME_LENGTH 50
 #define MAX_APPEARANCE_LENGTH 100
 #define MAX_PHONE_LENGTH 15
-#define RESIDENTS_COUNT 3
+#define RESIDENTS_COUNT 5
 #define FILENAME "res.txt"
 #define RESULT_FILENAME "result.txt"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     char hairColor[MAX_NAME_LENGTH];
@@ -91,7 +86,7 @@ void inputVisitorPass(VisitorPass* visitor) {
 CheckResult checkVisitor(const Resident residents[], VisitorPass visitor, int chel) {
     CheckResult result = { 1 };
     
-    for (int i = chel; i == chel; i++) {
+    int i = chel;
         int a = 0;
         if (strcmp(residents[i].firstName, visitor.firstName) != 0) {
             result.discrepancyReason = "Неправильное имя";
@@ -118,46 +113,33 @@ CheckResult checkVisitor(const Resident residents[], VisitorPass visitor, int ch
             return result;
         }
         else result.isMatch = 0;
-        
-        /*
-        if (strcmp(residents[i].firstName, visitor.firstName) == 0 &&
-            strcmp(residents[i].lastName, visitor.lastName) == 0 &&
-            strcmp(residents[i].id, visitor.id) == 0) {
-            result.isMatch = 1;
-            return result;
-        }
-        else if (strcmp(residents[i].id, visitor.id) == 0) {
-            if (strcmp(residents[i].appearance.hairColor, visitor.appearance.hairColor) != 0) {
-                result.discrepancyReason = "неправильный цвет волос";
-            }
-            else if (strcmp(residents[i].appearance.clothes, visitor.appearance.clothes) != 0) {
-                result.discrepancyReason = "неправильная одежда";
-            }
-            result.isMatch = 0;
-            //result.resident = residents[i];
-            return result;
-        }*/
-    }
     return result;
 }
 
-/*void logResult(int realResidentsPassed, int impostorsPassed, const char* discrepancyReason) {
-    FILE* resultFile = fopen(RESULT_FILENAME, "a");
-    if (!resultFile) {
-        perror("Ошибка открытия файла для записи результата");
-        exit(EXIT_FAILURE);
+void callResident(const Resident* resident, int f) {
+    printf("Звонок на номер: %s\n", resident->phone);
+    // Симуляция звонка
+    for (int i = 0; i < 3; ++i) {
+        printf("Звонок...\n");
+        Sleep(1000); // Задержка 1 секунда
     }
+    if (f == 1) {
+        printf("Ответ: Я дома!\n"); // Двойник
+    }
+    else {
+        printf("Ответа нет.\n"); // Настоящий житель не отвечает
+    }
+}
 
-    if (impostorsPassed > 0) {
-        fprintf(resultFile, "Монстров пропущено: %d\n", impostorsPassed);
-        fprintf(resultFile, "В чём несовпадение данных у пропущенных монстров: %s\n", discrepancyReason);
+// Функция для поиска жильца по ID
+int findResidentById(const Resident residents[], const char* id) {
+    for (int i = 0; i < RESIDENTS_COUNT; i++) {
+        if (strcmp(residents[i].id, id) == 0) {
+            return i; // Возвращаем индекс жильца с совпадающим ID
+        }
     }
-    if (realResidentsPassed > 0) {
-        fprintf(resultFile, "Настоящих жильцов пропущено: %d\n", realResidentsPassed);
-    }
-
-    fclose(resultFile);
-}*/
+    return -1; // Нет совпадения 
+}
 
 int main() {
     SetConsoleCP(1251);
@@ -182,17 +164,22 @@ int main() {
     int proh = 0;
 
     while (1) {
-        int chel = 0 + rand() % (2 - 0 + 1);
-        printf("\nchel = %d\n", chel);
+        int chel = rand() % 5;
+        //printf("\nchel = %d\n", chel);
 
         // Ввод данных пришедшего жильца
         inputVisitorPass(&visitor);
 
         // Проверка данных
-        char prop;
+        char prop, zvon;
         CheckResult result = checkVisitor(residents, visitor, chel);
+        int f = 0;
         if (result.isMatch) {
             printf("\nДанные совпадают. Допуск разрешён.\n");
+            printf("\nВы хотите позвонить в квартиру жильца?(y/n)\n");
+            scanf("%c", &zvon);
+            while (getchar() != '\n'); // Очистка буфера
+            if(zvon == 'y' || zvon == 'Y') callResident(&residents[chel], f);// Звонок настоящему жильцу
             puts("Вы хотите его пропустить? (y/n)\n");
             scanf(" %c", &prop);
             while (getchar() != '\n'); // Очистка буфера
@@ -203,6 +190,20 @@ int main() {
         }
         else {
             printf("\nДанные не совпадают. Возможно, это монстр-двойник! Причина: %s\n", result.discrepancyReason);
+            printf("\nВы хотите позвонить в квартиру жильца?(y/n)\n");
+            scanf("%c", &zvon);
+            while (getchar() != '\n'); // Очистка буфера
+            if (zvon == 'y' || zvon == 'Y') {
+                // Попробуем найти жильца по ID
+                int residentIndex = findResidentById(residents, visitor.id);
+                if (residentIndex != -1) {
+                    f = 1;
+                    callResident(&residents[chel], f); // Звонок настоящему жильцу
+                }
+                else {
+                    printf("Не удалось найти жильца с ID %s.\n", visitor.id);
+                }
+            }
             puts("Вы хотите его пропустить? (y/n)\n");
             scanf(" %c", &prop);
             while (getchar() != '\n'); // Очистка буфера
@@ -215,7 +216,7 @@ int main() {
         }
 
         proh++;
-        if (proh == 10) {
+        if (proh == 5) {
             puts("\nПоздравляем! Вы не погибли сегодня!\n");
             break;
         }
@@ -228,6 +229,11 @@ int main() {
             break;
         }
     }
+    printf("\nРезультаты этой игры: \n");
+    printf("Настоящих жильцов пропущено: %d\n", totalActualResidents);
+    printf("Монстров-двойников пропущено: %d\n", totalMonsters);
+    printf("Настоящих жильцов не пропущено: %d\n", totalActResNOT);
+    printf("Монстров-двойников не пропущено: %d\n", totalMonsNOT);
 
     fprintf(resultFile, "Настоящих жильцов пропущено: %d\n", totalActualResidents);
     fprintf(resultFile, "Монстров-двойников пропущено: %d\n", totalMonsters);
@@ -237,419 +243,51 @@ int main() {
     fclose(resultFile);
     printf("Результаты проверки записаны в файл results.txt\n");
 
-    FILE* resultFile1 = fopen(RESULT_FILENAME, "r");
-    if (resultFile1 == NULL) {
-        printf("Не удалось открыть файл для чтения.\n");
-        return 1;
-    }
-    char s[40];
-    int A[80];
-    int i = 0;
-    while (1) {
-        if (fscanf(resultFile1, "%[^:]: %d\n", s, &A[i]) == EOF) break;
-        i++;
-    }
-    int itogI = i;
-    i = 0;
-    while (i < itogI) {
-        printf("%d ", A[i]);
-        i++;
-    }
-    i = 0;
-    int itog1, itog2, itog3, itog4;
-    itog1 = A[i];
-    itog2 = A[i + 1];
-    itog3 = A[i + 2];
-    itog4 = A[i + 3];
-    while (i < (itogI - 1)) {
-        if (A[i + 4] > itog1) itog1 = A[i + 4];
-        i++;
-        if (A[i + 4] > itog2) itog2 = A[i + 4];
-        i++;
-        if (A[i + 4] > itog3) itog3 = A[i + 4];
-        i++;
-        if (A[i + 4] > itog4) itog4 = A[i + 4];
-        i++;
-    }
-    printf("\nРекорд пропускания настоящих жильцов: %d.\n", itog1);
-    printf("Рекорд пропускания монстров-двойников: %d.\n", itog2);
-    printf("Больше всего не пропущенных настоящих жильцов: %d.\n", itog3);
-    printf("Больше всего не пропущенных монстров-двойников: %d.\n", itog4);
-    fclose(resultFile1);
-
-    return 0;
-}
-
-
-
-
-
-
-
-// Class
-
-/*#define MAX_NAME_LENGTH 50
-#define MAX_APPEARANCE_LENGTH 50
-#define MAX_PHONE_LENGTH 15
-#define RESIDENTS_COUNT 3
-
-class Appearance {
-private:
-    char hairColor[MAX_NAME_LENGTH];
-    char clothes[MAX_APPEARANCE_LENGTH];
-
-public:
-    Appearance() {
-        strcpy(hairColor, "");
-        strcpy(clothes, "");
-    }
-
-    void setHairColor(const char* color) {
-        strncpy(hairColor, color, MAX_NAME_LENGTH);
-        hairColor[MAX_NAME_LENGTH - 1] = '\0';
-    }
-
-    void setClothes(const char* clothing) {
-        strncpy(clothes, clothing, MAX_APPEARANCE_LENGTH);
-        clothes[MAX_APPEARANCE_LENGTH - 1] = '\0';
-    }
-
-    const char* getHairColor() const {
-        return hairColor;
-    }
-
-    const char* getClothes() const {
-        return clothes;
-    }
-};
-
-class Resident {
-private:
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[3]; // Идентификационный номер из 2 цифр
-    Appearance appearance;
-    char phone[MAX_PHONE_LENGTH];
-
-public:
-    
-    Resident() {
-        firstName[0] = '\0';
-        lastName[0] = '\0';
-        id[0] = '\0';
-        phone[0] = '\0';
-    }
-    Resident(const char* firstName, const char* lastName, const char* id, const Appearance& appearance, const char* phone) {
-        setFirstName(firstName);
-        setLastName(lastName);
-        setID(id);
-        setAppearance(appearance);
-        setPhone(phone);
-    }
-
-    void setFirstName(const char* name) {
-        strncpy(firstName, name, MAX_NAME_LENGTH);
-        firstName[MAX_NAME_LENGTH - 1] = '\0';
-    }
-
-    void setLastName(const char* name) {
-        strncpy(lastName, name, MAX_NAME_LENGTH);
-        lastName[MAX_NAME_LENGTH - 1] = '\0';
-    }
-
-    void setID(const char* identification) {
-        strncpy(id, identification, 2);
-        id[2] = '\0';
-    }
-
-    void setAppearance(const Appearance& ap) {
-        appearance = ap;
-    }
-
-    void setPhone(const char* number) {
-        strncpy(phone, number, MAX_PHONE_LENGTH);
-        phone[MAX_PHONE_LENGTH - 1] = '\0';
-    }
-
-    const char* getFirstName() const {
-        return firstName;
-    }
-
-    const char* getLastName() const {
-        return lastName;
-    }
-
-    const char* getID() const {
-        return id;
-    }
-
-    Appearance& getAppearance() { //Для возврата ссылки
-        return appearance;
-    }
-
-    const char* getPhone() const {
-        return phone;
-    }
-};
-
-class VisitorPass {
-private:
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[3]; 
-    Appearance appearance;
-
-public:
-    VisitorPass() {
-        strcpy(firstName, "");
-        strcpy(lastName, "");
-        strcpy(id, "");
-    }
-    VisitorPass(const char* firstName, const char* lastName, const char* id, const Appearance& appearance) {
-        setFirstName(firstName);
-        setLastName(lastName);
-        setID(id);
-        setAppearance(appearance);
-    }
-    void setFirstName(const char* name) {
-        strncpy(firstName, name, MAX_NAME_LENGTH);
-        firstName[MAX_NAME_LENGTH - 1] = '\0';
-    }
-
-    void setLastName(const char* name) {
-        strncpy(lastName, name, MAX_NAME_LENGTH);
-        lastName[MAX_NAME_LENGTH - 1] = '\0';
-    }
-
-    void setID(const char* identification) {
-        strncpy(id, identification, 2);
-        id[2] = '\0';
-    }
-
-    void setAppearance(const Appearance& ap) {
-        appearance = ap;
-    }
-
-    const char* getFirstName() const {
-        return firstName;
-    }
-
-    const char* getLastName() const {
-        return lastName;
-    }
-
-    const char* getID() const {
-        return id;
-    }
-
-    Appearance& getAppearance() { // Для возврата ссылки
-        return appearance;
-    }
-};
-
-// Инициализация изначальных данных жильцов
-void initializeResidents(Resident* residents) {
-    Appearance ap;
-
-    ap.setHairColor("Коричневый");
-    ap.setClothes("Синий свитер");
-    residents[0] = Resident("Иван", "Иванов", "01", ap, "123456789");
-
-    ap.setHairColor("Коричневый");
-    ap.setClothes("Красная футболка");
-    residents[1] = Resident("Пётр", "Сидоров", "02", ap, "123456790");
-
-    ap.setHairColor("Brown");
-    ap.setClothes("Blue sweater");
-    residents[2] = Resident("Ivan", "Ivanov", "03", ap, "123456791");
-}
-
-// Ввод данных жильца, который пришёл на проверку
-void inputVisitorPass(VisitorPass& visitor) {
-    char name[MAX_NAME_LENGTH];
-    char surname[MAX_NAME_LENGTH];
-    char id[3];
-    char hairColor[MAX_NAME_LENGTH];
-    char clothes[MAX_APPEARANCE_LENGTH];
-
-    std::cout << "Введите имя: ";
-    std::cin.getline(name, MAX_NAME_LENGTH);
-    visitor.setFirstName(name);
-
-    std::cout << "Введите фамилию: ";
-    std::cin.getline(surname, MAX_NAME_LENGTH);
-    visitor.setLastName(surname);
-    
-    std::cout << "Введите идентификационный номер (2 цифры): ";
-    std::cin.getline(id, 3);
-    visitor.setID(id);
-
-    std::cout << "Введите цвет волос: ";
-    std::cin.getline(hairColor, MAX_NAME_LENGTH);
-    visitor.getAppearance().setHairColor(hairColor);
-
-    std::cout << "Введите одежду: ";
-    std::cin.getline(clothes, MAX_APPEARANCE_LENGTH);
-    visitor.getAppearance().setClothes(clothes);
-}
-
-// Функция проверки данных
-int checkVisitor(Resident* residents, VisitorPass visitor) {
-    for (int i = 0; i < RESIDENTS_COUNT; i++) {
-        if (strcmp(residents[i].getFirstName(), visitor.getFirstName()) == 0 &&
-            strcmp(residents[i].getLastName(), visitor.getLastName()) == 0 &&
-            strcmp(residents[i].getID(), visitor.getID()) == 0 &&
-            strcmp(residents[i].getAppearance().getHairColor(), visitor.getAppearance().getHairColor()) == 0 &&
-            strcmp(residents[i].getAppearance().getClothes(), visitor.getAppearance().getClothes()) == 0) {
-            return 1; // Совпадение
-        }
-    }
-    return 0; // Нет совпадения
-}
-
-int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    Resident* residents = new Resident[RESIDENTS_COUNT];
-    VisitorPass visitor;
-
-    initializeResidents(residents);
-
-    // Ввод данных пришедшего жильца
-    inputVisitorPass(visitor);
-
-    // Проверяем данные
-    if (checkVisitor(residents, visitor)) {
-        std::cout << "\nДанные совпадают. Допуск разрешён.\n";
-    }
-    else {
-        std::cout << "\nДанные не совпадают. Возможно, это монстр-двойник!\n";
-    }
-    delete[] residents; // Освобождаем память
-    return 0;
-}*/
-
-
-
-
-
-/*#define MAX_NAME_LENGTH 50
-#define MAX_APPEARANCE_LENGTH 100
-#define MAX_PHONE_LENGTH 15
-#define RESIDENTS_COUNT 3
-
-typedef struct {
-    char hairColor[MAX_NAME_LENGTH];
-    char clothes[MAX_APPEARANCE_LENGTH];
-} Appearance;
-
-typedef struct {
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[3]; // Идентификационный номер из 2 цифр
-    Appearance appearance;
-    char phone[MAX_PHONE_LENGTH];
-} Resident;
-
-typedef struct {
-    char firstName[MAX_NAME_LENGTH];
-    char lastName[MAX_NAME_LENGTH];
-    char id[3];
-    Appearance appearance;
-} VisitorPass;
-
-typedef struct {
-    Resident resident;
-    int isMatch;
-} CheckResult;
-
-
-// Функция инициализации изначальных данных жильцов
-void initializeResidents(Resident residents[]) {
-    //0
-    strcpy(residents[0].firstName, "Иван");
-    strcpy(residents[0].lastName, "Иванов");
-    strcpy(residents[0].id, "01");
-    strcpy(residents[0].appearance.hairColor, "Коричневый");
-    strcpy(residents[0].appearance.clothes, "Синий свитер");
-    strcpy(residents[0].phone, "123456789");
-    //1
-    strcpy(residents[1].firstName, "пётр");
-    strcpy(residents[1].lastName, "сидоров");
-    strcpy(residents[1].id, "02");
-    strcpy(residents[1].appearance.hairColor, "коричневый");
-    strcpy(residents[1].appearance.clothes, "красная футболка");
-    strcpy(residents[1].phone, "123456790");
-    //2
-    strcpy(residents[2].firstName, "Ivan");
-    strcpy(residents[2].lastName, "Ivanov");
-    strcpy(residents[2].id, "03");
-    strcpy(residents[2].appearance.hairColor, "Brown");
-    strcpy(residents[2].appearance.clothes, "Blue sweater");
-    strcpy(residents[2].phone, "123456791");
-}
-
-// Функция ввода данных жильца, который пришёл на проверку
-void inputVisitorPass(VisitorPass* visitor) {
-    printf("Введите имя: ");
-    gets_s(visitor->firstName);
-    printf("Введите фамилию: ");
-    gets_s(visitor->lastName);
-    printf("Введите идентификационный номер (2 цифр): ");
-    gets_s(visitor->id);
-    printf("Введите цвет волос: ");
-    gets_s(visitor->appearance.hairColor);
-    printf("Введите одежду: ");
-    gets_s(visitor->appearance.clothes);
-}
-
-// Функция проверки данных
-int checkVisitor(const Resident residents[], VisitorPass visitor) {
-    for (int i = 0; i < RESIDENTS_COUNT; i++) {
-        if (strcmp(residents[i].firstName, visitor.firstName) == 0 &&
-            strcmp(residents[i].lastName, visitor.lastName) == 0 &&
-            strcmp(residents[i].id, visitor.id) == 0 &&
-            strcmp(residents[i].appearance.hairColor, visitor.appearance.hairColor) == 0 &&
-            strcmp(residents[i].appearance.clothes, visitor.appearance.clothes) == 0) {
+    char rec;
+    printf("\nХотите узнать рекорды за всё время?(y/n)\n");
+    scanf("%c", &rec);
+    while (getchar() != '\n'); // Очистка буфера
+    if (rec == 'y' || rec == 'Y') {
+        FILE* resultFile1 = fopen(RESULT_FILENAME, "r");
+        if (resultFile1 == NULL) {
+            printf("Не удалось открыть файл для чтения.\n");
             return 1;
         }
+        char s[40];
+        int A[80];
+        int i = 0;
+        while (1) {
+            if (fscanf(resultFile1, "%[^:]: %d\n", s, &A[i]) == EOF) break;
+            i++;
+        }
+        int itogI = i;
+        i = 0;
+        while (i < itogI) {
+            //printf("%d ", A[i]);
+            i++;
+        }
+        i = 0;
+        int itog1, itog2, itog3, itog4;
+        itog1 = A[i];
+        itog2 = A[i + 1];
+        itog3 = A[i + 2];
+        itog4 = A[i + 3];
+        while (i < (itogI - 1)) {
+            if (A[i + 4] > itog1) itog1 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog2) itog2 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog3) itog3 = A[i + 4];
+            i++;
+            if (A[i + 4] > itog4) itog4 = A[i + 4];
+            i++;
+        }
+        printf("\nРекорд пропускания настоящих жильцов: %d.\n", itog1);
+        printf("Рекорд пропускания монстров-двойников: %d.\n", itog2);
+        printf("Больше всего не пропущенных настоящих жильцов: %d.\n", itog3);
+        printf("Больше всего не пропущенных монстров-двойников: %d.\n", itog4);
+        fclose(resultFile1);
     }
+
     return 0;
 }
-
-int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    Resident residents[RESIDENTS_COUNT];
-    VisitorPass visitor;
-
-    initializeResidents(residents);
-
-    // Ввод данных пришедшего жильца
-    inputVisitorPass(&visitor);
-
-    // Вывод результата проверки
-    if (checkVisitor(residents, visitor)) {
-        printf("\nДанные совпадают. Допуск разрешён.\n");
-    }
-    else {
-        printf("\nДанные не совпадают. Возможно, это монстр-двойник!\n");
-    }
-
-    return 0;
-}*/
-
-
-
-
-
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
